@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event.action }}
+  cancel-in-progress: true
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -q
+
+  merge-gate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Drop stale approval on new commits
+        if: github.event.action == 'synchronize'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (pr.labels.some(l => l.name === 'review:approved')) {
+              await github.rest.issues.removeLabel({
+                ...context.repo, issue_number: pr.number, name: 'review:approved',
+              });
+              await github.rest.issues.createComment({
+                ...context.repo, issue_number: pr.number,
+                body: 'New commits pushed after approval, so `review:approved` was removed. Reviewer must re-review.',
+              });
+            }
+
+      - name: Check gate conditions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              ...context.repo, pull_number: context.payload.pull_request.number,
+            });
+            const labels = pr.labels.map(l => l.name);
+            const body = pr.body || '';
+            const problems = [];
+
+            if (!labels.includes('review:approved')) problems.push('missing label `review:approved`');
+            if (labels.includes('needs-human')) problems.push('has `needs-human`; Supervisor or human must resolve');
+            if (!/Closes\s+#\d+/i.test(body)) problems.push('body must link the ticket with `Closes #<issue>`');
+
+            const section = (body.split(/^##\s+Feature run\s*$/im)[1] || '').split(/^##\s/m)[0];
+            const content = section
+              .replace(/<!--[\s\S]*?-->/g, '')
+              .split('\n')
+              .map(s => s.trim())
+              .filter(s => s && !s.startsWith('```'));
+            if (content.length === 0) problems.push('"Feature run" section is empty');
+
+            if (problems.length) {
+              core.setFailed('Merge gate not satisfied:\n- ' + problems.join('\n- '));
+            } else {
+              core.info('Merge gate satisfied.');
+            }

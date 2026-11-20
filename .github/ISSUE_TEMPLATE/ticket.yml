@@ -1,0 +1,59 @@
+name: Ticket
+description: One unit of work for one Builder agent. One ticket = one branch = one pull request.
+title: "[ticket] "
+labels: ["status:ready"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What the feature does and why, in one or two sentences.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Checkable statements, including endpoints, status codes, and edge cases.
+      placeholder: |
+        - [ ] POST /notes with a valid body returns 201 and the created note
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Files owned
+      description: The only paths the Builder may create or edit (see ADR-0003).
+      placeholder: |
+        - app/features/<name>/
+        - tests/test_<name>.py
+        - scripts/run_<name>.py
+    validations:
+      required: true
+  - type: input
+    id: test_command
+    attributes:
+      label: Test command
+      placeholder: python -m pytest tests/test_<name>.py
+    validations:
+      required: true
+  - type: input
+    id: run_command
+    attributes:
+      label: Feature-run command
+      placeholder: python -m scripts.run_<name>
+    validations:
+      required: true
+  - type: input
+    id: adrs
+    attributes:
+      label: Linked ADRs
+      placeholder: ADR-0002, ADR-0003
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes for the Builder
+      description: Path prefixes, constraints, out of scope.
