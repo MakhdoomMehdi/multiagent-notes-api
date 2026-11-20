@@ -33,14 +33,17 @@ gh issue create --title "[ticket] <name>: <summary>" --label status:ready --body
 ```
 
 ### 3. Dispatch Builders, all in parallel
-For every `status:ready` ticket, launch one Task subagent with `subagent_type: best-of-n-runner`
-(each gets its own git worktree and branch), all in the same message, `run_in_background: true`:
+For every `status:ready` ticket, launch one Task subagent (`subagent_type: generalPurpose`), all in
+the same message, `run_in_background: true`. Each Builder creates its own git worktree and branch
+(builder.md step 1), so parallel Builders never share a working directory:
 
 ```
-You are a Builder. Read .cursor/agents/builder.md and AGENTS.md and follow them exactly.
-Ticket: #<issue>  Branch: ticket/<issue>-<slug>
-PYTHON=<absolute path to the main checkout's .venv\Scripts\python.exe>
-Repo: <owner>/<repo>
+You are a Builder. Read <REPO_DIR>/.cursor/agents/builder.md and <REPO_DIR>/AGENTS.md and follow them exactly.
+Ticket: #<issue>  Branch: ticket/<issue>-<slug>  Repo: <owner>/<repo>
+REPO_DIR=<absolute path of the main checkout>
+WORKTREES_DIR=<absolute path of the worktrees folder, outside the repo>
+PYTHON=<REPO_DIR>\.venv\Scripts\python.exe
+Return: the pull request URL, or "BLOCKED: <question>".
 ```
 
 ### 4. Unblock
@@ -49,12 +52,15 @@ comment (clarify the ticket; never write code for them), set the label back to
 `status:in-progress`, and resume that Builder with the answer.
 
 ### 5. Dispatch the Reviewer
-For each pull request labelled `status:in-review`, launch a Task subagent with the `reviewer`
-agent (or `generalPurpose` with `readonly: true` if it is unavailable):
+For each pull request labelled `status:in-review`, launch a fresh Task subagent
+(`subagent_type: generalPurpose`). A fresh Reviewer each round keeps the review independent of
+the Builder's reasoning:
 
 ```
-You are the Reviewer. Read .cursor/agents/reviewer.md and AGENTS.md and follow them exactly.
-Pull request: #<pr>  Repo: <owner>/<repo>
+You are the Reviewer. Read <REPO_DIR>/.cursor/agents/reviewer.md and <REPO_DIR>/AGENTS.md and follow them exactly.
+You must not edit, create, or delete any file, and must not commit or push.
+Pull request: #<pr>  Repo: <owner>/<repo>  REPO_DIR=<absolute path of the main checkout>
+Return: the round number, the verdict, and the list of required changes.
 ```
 
 When the Reviewer requests changes, resume the same Builder with "Address review round N on
@@ -63,5 +69,6 @@ one-paragraph summary.
 
 ### 6. Merge
 When both checks pass (`gh pr checks <pr>`), run `gh pr merge <pr> --squash --delete-branch`.
-Merge in any order; features are independent. After all merges, run the full test suite once on
+Merge in any order; features are independent. Remove the merged worktree with
+`git worktree remove <WORKTREES_DIR>/ticket-<issue>`. After all merges, run the full test suite once on
 `main` and report: tickets, pull requests, rounds used, ADRs added, anything left for the human.

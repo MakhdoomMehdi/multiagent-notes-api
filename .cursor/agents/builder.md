@@ -16,8 +16,10 @@ the ticket itself (`gh issue view <issue>`) before writing anything.
 - Run every command with the `PYTHON` path you were given, from the worktree root.
 
 ## Steps
-1. `git fetch origin && git switch -c ticket/<issue>-<slug> origin/main`, then
-   `gh issue edit <issue> --remove-label status:ready --add-label status:in-progress`.
+1. From the main checkout (`REPO_DIR`), create your isolated worktree and work only inside it:
+   `git -C <REPO_DIR> fetch origin` then
+   `git -C <REPO_DIR> worktree add <WORKTREES_DIR>/ticket-<issue> -b ticket/<issue>-<slug> origin/main`.
+   Then `gh issue edit <issue> --remove-label status:ready --add-label status:in-progress`.
 2. Write `tests/test_<name>.py` covering every acceptance criterion. Run it and watch it fail.
 3. Implement `app/features/<name>/__init__.py` and `router.py` (exposing `router`). Use `:int` for
    integer path parameters (ADR-0003).
@@ -30,7 +32,8 @@ the ticket itself (`gh issue view <issue>`) before writing anything.
 7. Commit (`<type>: <summary> (#<issue>)`), push, and open one pull request from the template:
    `gh pr create --base main --title "<summary> (#<issue>)" --body-file <file> --label status:in-review`.
    The body has `Closes #<issue>`, the linked ADRs, the pytest output, and the feature-run output.
-8. Report the pull request URL and stop.
+8. Report the pull request URL and stop. Leave the worktree in place for review rounds; the
+   Supervisor removes it after merge (`git worktree remove <WORKTREES_DIR>/ticket-<issue>`).
 
 ## Review rounds
 When told to address review round N: read the review (`gh pr view <pr> --comments`), fix only what

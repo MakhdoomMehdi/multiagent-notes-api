@@ -31,7 +31,8 @@ Every agent reads this file first. Role prompts are in `.cursor/agents/`. Decisi
 
 ## Branches and pull requests
 
-- Branch name: `ticket/<issue-number>-<short-slug>`, cut from the latest `main`.
+- Branch name: `ticket/<issue-number>-<short-slug>`, cut from the latest `main`, checked out in
+  its own worktree `<WORKTREES_DIR>/ticket-<issue-number>` (outside the repo folder).
 - One ticket = one branch = one pull request. Squash-merge into `main`.
 - Fill in every section of the pull request template, including "Feature run".
 
