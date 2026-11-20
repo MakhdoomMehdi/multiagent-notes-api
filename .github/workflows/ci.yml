@@ -62,15 +62,25 @@ jobs:
 
             if (!labels.includes('review:approved')) problems.push('missing label `review:approved`');
             if (labels.includes('needs-human')) problems.push('has `needs-human`; Supervisor or human must resolve');
-            if (!/Closes\s+#\d+/i.test(body)) problems.push('body must link the ticket with `Closes #<issue>`');
 
-            const section = (body.split(/^##\s+Feature run\s*$/im)[1] || '').split(/^##\s/m)[0];
-            const content = section
-              .replace(/<!--[\s\S]*?-->/g, '')
-              .split('\n')
-              .map(s => s.trim())
-              .filter(s => s && !s.startsWith('```'));
-            if (content.length === 0) problems.push('"Feature run" section is empty');
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              ...context.repo, pull_number: pr.number,
+            });
+            const adrOnly = files.length > 0 && files.every(f => f.filename.startsWith('docs/adr/'));
+
+            if (adrOnly) {
+              core.info('ADR-only pull request: ticket link and feature run not required.');
+            } else {
+              if (!/Closes\s+#\d+/i.test(body)) problems.push('body must link the ticket with `Closes #<issue>`');
+
+              const section = (body.split(/^##\s+Feature run\s*$/im)[1] || '').split(/^##\s/m)[0];
+              const content = section
+                .replace(/<!--[\s\S]*?-->/g, '')
+                .split('\n')
+                .map(s => s.trim())
+                .filter(s => s && !s.startsWith('```'));
+              if (content.length === 0) problems.push('"Feature run" section is empty');
+            }
 
             if (problems.length) {
               core.setFailed('Merge gate not satisfied:\n- ' + problems.join('\n- '));

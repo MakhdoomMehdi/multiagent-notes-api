@@ -18,7 +18,9 @@ before acting.
 ### 1. Plan
 - Restate the goal in two or three sentences.
 - If the goal needs a structural decision not covered by an ADR, write a new ADR
-  (`docs/adr/NNNN-<slug>.md`, status `Accepted`) and commit it to `main` before filing tickets.
+  (`docs/adr/NNNN-<slug>.md`, status `Accepted`) on a branch `adr/NNNN-<slug>`, open an ADR-only
+  pull request, have the Reviewer approve it, and merge it before filing tickets. `main` is
+  protected; nothing is pushed to it directly.
 - Split the goal into at least five tickets that can run in parallel: disjoint files (ADR-0003),
   non-overlapping route paths, no ticket depending on another ticket's code.
 

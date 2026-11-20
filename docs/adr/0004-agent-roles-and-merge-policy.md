@@ -22,7 +22,8 @@ one agent being right.
   protection on `main` and the `ci` workflow:
   1. `lint-and-test` passes (ruff and pytest).
   2. `merge-gate` passes: the pull request has `review:approved`, does not have `needs-human`,
-     links an issue with `Closes #N`, and has a filled-in "Feature run" section.
+     links an issue with `Closes #N`, and has a filled-in "Feature run" section. A pull request
+     that only changes `docs/adr/` needs only the approval label.
 - **Approval label.** All agents act through one GitHub account, which cannot approve its own pull
   requests, so the Reviewer's approval is recorded as a review comment plus the `review:approved`
   label. Any push after approval removes the label (enforced by the workflow), forcing a re-review.
