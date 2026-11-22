@@ -3,7 +3,7 @@
 - Status: Accepted
 - Date: 2026-11-23
 - Deciders: Human lead, Supervisor agent
-- Ticket / PR: #3
+- Ticket / PR: #3, #4
 - Supersedes: nothing
 
 ## Context
