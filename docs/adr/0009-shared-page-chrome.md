@@ -3,7 +3,7 @@
 - Status: Accepted
 - Date: 2026-11-23
 - Deciders: Human lead, Supervisor agent
-- Ticket / PR: #15
+- Ticket / PR: #15, #16
 - Supersedes: in ADR-0008, the lines that assign the notes-page HTML to Atlas and that forbid a shared layout. The rest of ADR-0008 still stands.
 
 ## Context
