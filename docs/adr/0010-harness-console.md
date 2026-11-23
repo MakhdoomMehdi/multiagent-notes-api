@@ -3,7 +3,7 @@
 - Status: Accepted
 - Date: 2026-11-23
 - Deciders: Human lead, Supervisor agent
-- Ticket / PR: #21
+- Ticket / PR: #21, #39
 - Supersedes: nothing
 - Extends: ADR-0003, ADR-0009
 
