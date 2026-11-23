@@ -3,6 +3,8 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
+from app.ui.nav import with_sidebar
+
 router = APIRouter()
 
 PAGE = """<!DOCTYPE html>
@@ -131,4 +133,4 @@ document.getElementById("note-form").addEventListener("submit", async (event) =>
 
 @router.get("/pages/new", response_class=HTMLResponse)
 def new_note_page() -> HTMLResponse:
-    return HTMLResponse(PAGE)
+    return HTMLResponse(with_sidebar(PAGE))

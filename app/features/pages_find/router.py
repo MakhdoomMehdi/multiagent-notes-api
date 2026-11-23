@@ -3,6 +3,8 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
+from app.ui.nav import with_sidebar
+
 router = APIRouter()
 
 # The note is loaded in the browser with GET /notes/{id}. This page never queries the database.
@@ -116,4 +118,4 @@ PAGE_HTML = """<!DOCTYPE html>
 
 @router.get("/pages/find", response_class=HTMLResponse)
 def find_page() -> HTMLResponse:
-    return HTMLResponse(PAGE_HTML)
+    return HTMLResponse(with_sidebar(PAGE_HTML))

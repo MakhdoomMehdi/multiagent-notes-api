@@ -3,6 +3,8 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
+from app.ui.nav import with_sidebar
+
 router = APIRouter()
 
 _PAGE = """<!DOCTYPE html>
@@ -89,4 +91,5 @@ fetch("/notes/" + noteId).then(function (response) {
 
 @router.get("/pages/notes/{note_id:int}", response_class=HTMLResponse)
 def note_page(note_id: int) -> HTMLResponse:
-    return HTMLResponse(_PAGE.replace("__NOTE_ID__", str(note_id)))
+    html = _PAGE.replace("__NOTE_ID__", str(note_id))
+    return HTMLResponse(with_sidebar(html))

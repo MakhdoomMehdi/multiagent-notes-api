@@ -3,6 +3,8 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
+from app.ui.nav import with_sidebar
+
 router = APIRouter()
 
 PAGE = """<!DOCTYPE html>
@@ -77,4 +79,4 @@ PAGE = """<!DOCTYPE html>
 
 @router.get("/pages/help", response_class=HTMLResponse)
 def help_page() -> HTMLResponse:
-    return HTMLResponse(PAGE)
+    return HTMLResponse(with_sidebar(PAGE))
