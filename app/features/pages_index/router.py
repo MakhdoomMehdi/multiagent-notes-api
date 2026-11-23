@@ -3,6 +3,8 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 
+from app.ui.nav import with_sidebar
+
 router = APIRouter()
 
 PAGE = """<!DOCTYPE html>
@@ -75,4 +77,4 @@ form.addEventListener("submit", function (event) {
 
 @router.get("/pages", response_class=HTMLResponse)
 def pages_index() -> HTMLResponse:
-    return HTMLResponse(PAGE)
+    return HTMLResponse(with_sidebar(PAGE))
